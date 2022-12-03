@@ -2620,7 +2620,7 @@ showAccounts() {
 				path="${currentPath}vws?ed=2048"
 			fi
 			jq .inbounds[0].settings.clients ${configPath}05_VMess_WS_inbounds.json | jq -c '.[]' | while read -r user; do
-				echoContent skyBlue "\n ---> 帐号：$(echo "${user}" | jq -r .email )_$(echo "${user}" | jq -r .id)"
+				echoContent skyBlue "\n ---> 账号：$(echo "${user}" | jq -r .email )_$(echo "${user}" | jq -r .id)"
 				echo
 				defaultBase64Code vmessws $(echo "${user}" | jq -r .email) $(echo "${user}" | jq -r .id) "${currentHost}:${currentPort}" ${path} ${currentAdd}
 			done
@@ -3097,9 +3097,9 @@ updateV2RayAgent() {
 	echoContent skyBlue "\n progress  $1/${totalProgress} : Update V2RAY-Agent script"
 	rm -rf /etc/v2ray-agent/install.sh
 	if wget --help | grep -q show-progress; then
-		wget -c -q --show-progress -P /etc/v2ray-agent/ -N --no-check-certificate "https://raw.githubusercontent.com/RSKYS/v2ray-agent/master/install.sh"
+		wget -c -q --show-progress -P /etc/v2ray-agent/ -N --no-check-certificate "https://raw.githubusercontent.com/mack-a/v2ray-agent/master/install.sh"
 	else
-		wget -c -q -P /etc/v2ray-agent/ -N --no-check-certificate "https://raw.githubusercontent.com/RSKYS/v2ray-agent/master/install.sh"
+		wget -c -q -P /etc/v2ray-agent/ -N --no-check-certificate "https://raw.githubusercontent.com/mack-a/v2ray-agent/master/install.sh"
 	fi
 
 	sudo chmod 700 /etc/v2ray-agent/install.sh
@@ -3109,7 +3109,7 @@ updateV2RayAgent() {
 	echoContent yellow " ---> Please manually[vasma]Open script"
 	echoContent green " ---> current version:${version}\n"
 	echoContent yellow "If the update is unsuccessful, please manually perform the following command.\n"
-	echoContent skyBlue "wget -P /root -N --no-check-certificate "https://raw.githubusercontent.com/RSKYS/v2ray-agent/master/install.sh" && chmod 700 /root/install.sh && /root/install.sh"
+	echoContent skyBlue "wget -P /root -N --no-check-certificate "https://raw.githubusercontent.com/mack-a/v2ray-agent/master/install.sh" && chmod 700 /root/install.sh && /root/install.sh"
 	echo
 	exit 0
 }
