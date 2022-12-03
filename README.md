@@ -5,5 +5,5 @@ Based on whatever messy [v2ray-agent](https://github.com/rshinesun/v2ray-agent) 
 
 Just run this:
 ```
-wget -P /root -N --no-check-certificate "https://raw.githubusercontent.com/RSKYS/ss-agent/dev_ss/install.sh" && chmod 700 /root/install.sh && /root/install.sh
+wget -P /root -N --no-check-certificate "https://raw.githubusercontent.com/RSKYS/ss-agent/master/install.sh" && chmod 700 /root/install.sh && /root/install.sh
 ```
