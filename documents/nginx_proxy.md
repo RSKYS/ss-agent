@@ -30,7 +30,7 @@ server {
 	root /usr/share/nginx/html;
 	location /s/ {
 		add_header Content-Type text/plain;
-		alias /etc/v2ray-agent/subscribe/;
+		alias /etc/ss-agent/subscribe/;
 	}
 	location / {
 		add_header Strict-Transport-Security "max-age=15552000; preload" always;

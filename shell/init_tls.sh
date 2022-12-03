@@ -108,7 +108,7 @@ bakConfig(){
 }
 # 安装证书
 installTLS(){
-    echoColor yellow "请输入域名【例:blog.v2ray-agent.com】："
+    echoColor yellow "请输入域名【例:blog.ss-agent.com】："
     read domain
     if [[ -z ${domain} ]]
     then

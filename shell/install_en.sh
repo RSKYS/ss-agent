@@ -191,33 +191,33 @@ readInstallType() {
 	configPath=
 
 	# 1.Detection installation directory
-	if [[ -d "/etc/v2ray-agent" ]]; then
+	if [[ -d "/etc/ss-agent" ]]; then
 		# Detection installation method v2ray-core
-		if [[ -d "/etc/v2ray-agent/v2ray" && -f "/etc/v2ray-agent/v2ray/v2ray" && -f "/etc/v2ray-agent/v2ray/v2ctl" ]]; then
-			if [[ -d "/etc/v2ray-agent/v2ray/conf" && -f "/etc/v2ray-agent/v2ray/conf/02_VLESS_TCP_inbounds.json" ]]; then
-				configPath=/etc/v2ray-agent/v2ray/conf/
+		if [[ -d "/etc/ss-agent/v2ray" && -f "/etc/ss-agent/v2ray/v2ray" && -f "/etc/ss-agent/v2ray/v2ctl" ]]; then
+			if [[ -d "/etc/ss-agent/v2ray/conf" && -f "/etc/ss-agent/v2ray/conf/02_VLESS_TCP_inbounds.json" ]]; then
+				configPath=/etc/ss-agent/v2ray/conf/
 
-				if ! grep </etc/v2ray-agent/v2ray/conf/02_VLESS_TCP_inbounds.json -q xtls; then
+				if ! grep </etc/ss-agent/v2ray/conf/02_VLESS_TCP_inbounds.json -q xtls; then
 					# V2ray without XTLS-core
 					coreInstallType=2
-					# coreInstallPath=/etc/v2ray-agent/v2ray/v2ray
-					ctlPath=/etc/v2ray-agent/v2ray/v2ctl
-				elif grep </etc/v2ray-agent/v2ray/conf/02_VLESS_TCP_inbounds.json -q xtls; then
+					# coreInstallPath=/etc/ss-agent/v2ray/v2ray
+					ctlPath=/etc/ss-agent/v2ray/v2ctl
+				elif grep </etc/ss-agent/v2ray/conf/02_VLESS_TCP_inbounds.json -q xtls; then
 					# V2ray with XTLS-core
-					# coreInstallPath=/etc/v2ray-agent/v2ray/v2ray
-					ctlPath=/etc/v2ray-agent/v2ray/v2ctl
+					# coreInstallPath=/etc/ss-agent/v2ray/v2ray
+					ctlPath=/etc/ss-agent/v2ray/v2ctl
 					coreInstallType=3
 				fi
 			fi
 		fi
 
-		if [[ -d "/etc/v2ray-agent/xray" && -f "/etc/v2ray-agent/xray/xray" ]]; then
+		if [[ -d "/etc/ss-agent/xray" && -f "/etc/ss-agent/xray/xray" ]]; then
 			# Test Xray here-core
-			if [[ -d "/etc/v2ray-agent/xray/conf" ]] && [[ -f "/etc/v2ray-agent/xray/conf/02_VLESS_TCP_inbounds.json" || -f "/etc/v2ray-agent/xray/conf/02_trojan_TCP_inbounds.json" ]]; then
+			if [[ -d "/etc/ss-agent/xray/conf" ]] && [[ -f "/etc/ss-agent/xray/conf/02_VLESS_TCP_inbounds.json" || -f "/etc/ss-agent/xray/conf/02_trojan_TCP_inbounds.json" ]]; then
 				# xray-core
-				configPath=/etc/v2ray-agent/xray/conf/
-				# coreInstallPath=/etc/v2ray-agent/xray/xray
-				ctlPath=/etc/v2ray-agent/xray/xray
+				configPath=/etc/ss-agent/xray/conf/
+				# coreInstallPath=/etc/ss-agent/xray/xray
+				ctlPath=/etc/ss-agent/xray/xray
 				coreInstallType=1
 			fi
 		fi
@@ -365,19 +365,19 @@ showInstallStatus() {
 # Clean up old residue
 cleanUp() {
 	if [[ "$1" == "v2rayClean" ]]; then
-		rm -rf "$(find /etc/v2ray-agent/v2ray/* | grep -E '(config_full.json|conf)')"
+		rm -rf "$(find /etc/ss-agent/v2ray/* | grep -E '(config_full.json|conf)')"
 		handleV2Ray stop >/dev/null
 		rm -f /etc/systemd/system/v2ray.service
 	elif [[ "$1" == "xrayClean" ]]; then
-		rm -rf "$(find /etc/v2ray-agent/xray/* | grep -E '(config_full.json|conf)')"
+		rm -rf "$(find /etc/ss-agent/xray/* | grep -E '(config_full.json|conf)')"
 		handleXray stop >/dev/null
 		rm -f /etc/systemd/system/xray.service
 
 	elif [[ "$1" == "v2rayDel" ]]; then
-		rm -rf /etc/v2ray-agent/v2ray/*
+		rm -rf /etc/ss-agent/v2ray/*
 
 	elif [[ "$1" == "xrayDel" ]]; then
-		rm -rf /etc/v2ray-agent/xray/*
+		rm -rf /etc/ss-agent/xray/*
 	fi
 }
 
@@ -392,14 +392,14 @@ readConfigHostPathUUID
 
 # Initialization installation directory
 mkdirTools() {
-	mkdir -p /etc/v2ray-agent/tls
-	mkdir -p /etc/v2ray-agent/subscribe
-	mkdir -p /etc/v2ray-agent/subscribe_tmp
-	mkdir -p /etc/v2ray-agent/v2ray/conf
-	mkdir -p /etc/v2ray-agent/xray/conf
-	mkdir -p /etc/v2ray-agent/trojan
+	mkdir -p /etc/ss-agent/tls
+	mkdir -p /etc/ss-agent/subscribe
+	mkdir -p /etc/ss-agent/subscribe_tmp
+	mkdir -p /etc/ss-agent/v2ray/conf
+	mkdir -p /etc/ss-agent/xray/conf
+	mkdir -p /etc/ss-agent/trojan
 	mkdir -p /etc/systemd/system/
-	mkdir -p /tmp/v2ray-agent-tls/
+	mkdir -p /tmp/ss-agent-tls/
 }
 
 # Installation kit
@@ -529,10 +529,10 @@ installTools() {
 
 	if [[ ! -d "$HOME/.acme.sh" ]] || [[ -d "$HOME/.acme.sh" && -z $(find "$HOME/.acme.sh/acme.sh") ]]; then
 		echoContent green " ---> Install acme.sh"
-		curl -s https://get.acme.sh | sh -s >/etc/v2ray-agent/tls/acme.log 2>&1
+		curl -s https://get.acme.sh | sh -s >/etc/ss-agent/tls/acme.log 2>&1
 		if [[ ! -d "$HOME/.acme.sh" ]] || [[ -z $(find "$HOME/.acme.sh/acme.sh") ]]; then
 			echoContent red "  acme installation failed--->"
-			tail -n 100 /etc/v2ray-agent/tls/acme.log
+			tail -n 100 /etc/ss-agent/tls/acme.log
 			echoContent yellow "Error investigation:"
 			echoContent red "  1.Get the github file failed, please wait for Gitub to restore, try, recover progress to view [https://www.githubstatus.com/]"
 			echoContent red "  2.acme.the sh script has bugs, you can view[https://github.com/acmesh-official/acme.sh] issues"
@@ -635,12 +635,12 @@ initTLSNginxConfig() {
 			echoContent yellow "\n ---> domain name:${domain}"
 		else
 			echo
-			echoContent yellow "Please enter the domain name to configure：www.v2ray-agent.com --->"
+			echoContent yellow "Please enter the domain name to configure：www.ss-agent.com --->"
 			read -r -p "domain name:" domain
 		fi
 	else
 		echo
-		echoContent yellow "Please enter the domain name you want to configure example：www.v2ray-agent.com --->"
+		echoContent yellow "Please enter the domain name you want to configure example：www.ss-agent.com --->"
 		read -r -p "domain name:" domain
 	fi
 
@@ -704,7 +704,7 @@ server {
 	root /usr/share/nginx/html;
 	location /s/ {
     		add_header Content-Type text/plain;
-    		alias /etc/v2ray-agent/subscribe/;
+    		alias /etc/ss-agent/subscribe/;
     }
 
     location /${currentPath}grpc {
@@ -740,7 +740,7 @@ server {
 	root /usr/share/nginx/html;
 	location /s/ {
     		add_header Content-Type text/plain;
-    		alias /etc/v2ray-agent/subscribe/;
+    		alias /etc/ss-agent/subscribe/;
     }
 	location /${currentPath}grpc {
 		client_max_body_size 0;
@@ -765,7 +765,7 @@ server {
 	root /usr/share/nginx/html;
 	location /s/ {
     		add_header Content-Type text/plain;
-    		alias /etc/v2ray-agent/subscribe/;
+    		alias /etc/ss-agent/subscribe/;
     }
 	location /${currentPath}trojangrpc {
 		client_max_body_size 0;
@@ -789,7 +789,7 @@ server {
 	root /usr/share/nginx/html;
 	location /s/ {
     		add_header Content-Type text/plain;
-    		alias /etc/v2ray-agent/subscribe/;
+    		alias /etc/ss-agent/subscribe/;
     }
 	location / {
 	}
@@ -804,7 +804,7 @@ server {
 	root /usr/share/nginx/html;
 	location /s/ {
 		add_header Content-Type text/plain;
-		alias /etc/v2ray-agent/subscribe/;
+		alias /etc/ss-agent/subscribe/;
 	}
 	location / {
 		add_header Strict-Transport-Security "max-age=15552000; preload" always;
@@ -851,24 +851,24 @@ installTLS() {
 	echoContent skyBlue "\n progress  $1/${totalProgress} : Apply for a TLS certificate\n"
 	local tlsDomain=${domain}
 	# Install TLS
-	if [[ -f "/etc/v2ray-agent/tls/${tlsDomain}.crt" && -f "/etc/v2ray-agent/tls/${tlsDomain}.key" && -n $(cat "/etc/v2ray-agent/tls/${tlsDomain}.crt") ]] || [[ -d "$HOME/.acme.sh/${tlsDomain}_ecc" && -f "$HOME/.acme.sh/${tlsDomain}_ecc/${tlsDomain}.key" && -f "$HOME/.acme.sh/${tlsDomain}_ecc/${tlsDomain}.cer" ]]; then
+	if [[ -f "/etc/ss-agent/tls/${tlsDomain}.crt" && -f "/etc/ss-agent/tls/${tlsDomain}.key" && -n $(cat "/etc/ss-agent/tls/${tlsDomain}.crt") ]] || [[ -d "$HOME/.acme.sh/${tlsDomain}_ecc" && -f "$HOME/.acme.sh/${tlsDomain}_ecc/${tlsDomain}.key" && -f "$HOME/.acme.sh/${tlsDomain}_ecc/${tlsDomain}.cer" ]]; then
 		# Have a certificate
 		echoContent green " ---> Certificate"
 		checkTLStatus "${tlsDomain}"
 		if [[ "${tlsStatus}" == "expired" ]]; then
 			rm -rf $HOME/.acme.sh/${tlsDomain}_ecc/*
-			rm -rf /etc/v2ray-agent/tls/${tlsDomain}*
+			rm -rf /etc/ss-agent/tls/${tlsDomain}*
 			installTLS "$1"
 		else
 			echoContent green " ---> Certificate is valid"
 
-			if ! ls /etc/v2ray-agent/tls/ | grep -q "${tlsDomain}.crt" || ! ls /etc/v2ray-agent/tls/ | grep -q "${tlsDomain}.key" || [[ -z $(cat "/etc/v2ray-agent/tls/${tlsDomain}.crt") ]]; then
-				sudo "$HOME/.acme.sh/acme.sh" --installcert -d "${tlsDomain}" --fullchainpath "/etc/v2ray-agent/tls/${tlsDomain}.crt" --keypath "/etc/v2ray-agent/tls/${tlsDomain}.key" --ecc >/dev/null
+			if ! ls /etc/ss-agent/tls/ | grep -q "${tlsDomain}.crt" || ! ls /etc/ss-agent/tls/ | grep -q "${tlsDomain}.key" || [[ -z $(cat "/etc/ss-agent/tls/${tlsDomain}.crt") ]]; then
+				sudo "$HOME/.acme.sh/acme.sh" --installcert -d "${tlsDomain}" --fullchainpath "/etc/ss-agent/tls/${tlsDomain}.crt" --keypath "/etc/ss-agent/tls/${tlsDomain}.key" --ecc >/dev/null
 			else
 				echoContent yellow " ---> If you have not expired, please choose[n]\n"
 				read -r -p "Do you reinstall?[y/n]:" reInstallStatus
 				if [[ "${reInstallStatus}" == "y" ]]; then
-					rm -rf /etc/v2ray-agent/tls/*
+					rm -rf /etc/ss-agent/tls/*
 					installTLS "$1"
 				fi
 			fi
@@ -876,17 +876,17 @@ installTLS() {
 	elif [[ -d "$HOME/.acme.sh" ]] && [[ ! -f "$HOME/.acme.sh/${tlsDomain}_ecc/${tlsDomain}.cer" || ! -f "$HOME/.acme.sh/${tlsDomain}_ecc/${tlsDomain}.key" ]]; then
 		echoContent green " ---> Install TLS certificate"
 		if [[ -n "${pingIPv6}" ]]; then
-			sudo "$HOME/.acme.sh/acme.sh" --issue -d "${tlsDomain}" --standalone -k ec-256 --server letsencrypt --listen-v6 >> /etc/v2ray-agent/tls/acme.log
+			sudo "$HOME/.acme.sh/acme.sh" --issue -d "${tlsDomain}" --standalone -k ec-256 --server letsencrypt --listen-v6 >> /etc/ss-agent/tls/acme.log
 		else
-			sudo "$HOME/.acme.sh/acme.sh" --issue -d "${tlsDomain}" --standalone -k ec-256 --server letsencrypt >> /etc/v2ray-agent/tls/acme.log
+			sudo "$HOME/.acme.sh/acme.sh" --issue -d "${tlsDomain}" --standalone -k ec-256 --server letsencrypt >> /etc/ss-agent/tls/acme.log
 		fi
 
 		if [[ -d "$HOME/.acme.sh/${tlsDomain}_ecc" && -f "$HOME/.acme.sh/${tlsDomain}_ecc/${tlsDomain}.key" && -f "$HOME/.acme.sh/${tlsDomain}_ecc/${tlsDomain}.cer" ]]; then
-			sudo "$HOME/.acme.sh/acme.sh" --installcert -d "${tlsDomain}" --fullchainpath "/etc/v2ray-agent/tls/${tlsDomain}.crt" --keypath "/etc/v2ray-agent/tls/${tlsDomain}.key" --ecc >/dev/null
+			sudo "$HOME/.acme.sh/acme.sh" --installcert -d "${tlsDomain}" --fullchainpath "/etc/ss-agent/tls/${tlsDomain}.crt" --keypath "/etc/ss-agent/tls/${tlsDomain}.key" --ecc >/dev/null
 		fi
 
-		if [[ ! -f "/etc/v2ray-agent/tls/${tlsDomain}.crt" || ! -f "/etc/v2ray-agent/tls/${tlsDomain}.key"  ]] || [[ -z $(cat "/etc/v2ray-agent/tls/${tlsDomain}.key") || -z $(cat "/etc/v2ray-agent/tls/${tlsDomain}.crt") ]]; then
-			tail -n 10 /etc/v2ray-agent/tls/acme.log
+		if [[ ! -f "/etc/ss-agent/tls/${tlsDomain}.crt" || ! -f "/etc/ss-agent/tls/${tlsDomain}.key"  ]] || [[ -z $(cat "/etc/ss-agent/tls/${tlsDomain}.key") || -z $(cat "/etc/ss-agent/tls/${tlsDomain}.crt") ]]; then
+			tail -n 10 /etc/ss-agent/tls/acme.log
 			if [[ ${installTLSCount} == "1" ]];then
 				echoContent red " ---> TLS installation failed, please check acme logs"
 				exit 0
@@ -957,7 +957,7 @@ nginxBlog() {
 		if [[ "${nginxBlogInstallStatus}" == "y" ]]; then
 			rm -rf /usr/share/nginx/html
 			randomNum=$((RANDOM%6+1))
-			wget -q -P /usr/share/nginx https://raw.githubusercontent.com/mack-a/v2ray-agent/master/fodder/blog/unable/html${randomNum}.zip >/dev/null
+			wget -q -P /usr/share/nginx https://raw.githubusercontent.com/mack-a/ss-agent/master/fodder/blog/unable/html${randomNum}.zip >/dev/null
 			unzip -o /usr/share/nginx/html${randomNum}.zip -d /usr/share/nginx/html >/dev/null
 			rm -f /usr/share/nginx/html${randomNum}.zip*
 			echoContent green " ---> Add a camouflage site successfully"
@@ -965,7 +965,7 @@ nginxBlog() {
 	else
 		randomNum=$((RANDOM%6+1))
 		rm -rf /usr/share/nginx/html
-		wget -q -P /usr/share/nginx https://raw.githubusercontent.com/mack-a/v2ray-agent/master/fodder/blog/unable/html${randomNum}.zip >/dev/null
+		wget -q -P /usr/share/nginx https://raw.githubusercontent.com/mack-a/ss-agent/master/fodder/blog/unable/html${randomNum}.zip >/dev/null
 		unzip -o /usr/share/nginx/html${randomNum}.zip -d /usr/share/nginx/html >/dev/null
 		rm -f /usr/share/nginx/html${randomNum}.zip*
 		echoContent green " ---> Add a camouflage site successfully"
@@ -995,11 +995,11 @@ handleNginx() {
 # Timed task update TLS certificate
 installCronTLS() {
 	echoContent skyBlue "\n progress $1/${totalProgress} : Add tls certificate"
-	crontab -l >/etc/v2ray-agent/backup_crontab.cron
-	local historyCrontab=$(sed '/v2ray-agent/d;/acme.sh/d' /etc/v2ray-agent/backup_crontab.cron)
-	echo "${historyCrontab}" >/etc/v2ray-agent/backup_crontab.cron
-	echo "30 1 * * * /bin/bash /etc/v2ray-agent/install.sh RenewTLS >> /etc/v2ray-agent/crontab_tls.log 2>&1" >>/etc/v2ray-agent/backup_crontab.cron
-	crontab /etc/v2ray-agent/backup_crontab.cron
+	crontab -l >/etc/ss-agent/backup_crontab.cron
+	local historyCrontab=$(sed '/ss-agent/d;/acme.sh/d' /etc/ss-agent/backup_crontab.cron)
+	echo "${historyCrontab}" >/etc/ss-agent/backup_crontab.cron
+	echo "30 1 * * * /bin/bash /etc/ss-agent/install.sh RenewTLS >> /etc/ss-agent/crontab_tls.log 2>&1" >>/etc/ss-agent/backup_crontab.cron
+	crontab /etc/ss-agent/backup_crontab.cron
 	echoContent green "\n ---> Adding tls success"
 }
 
@@ -1030,7 +1030,7 @@ renewalTLS() {
 			echoContent yellow " ---> Regeneration certificate"
 			handleNginx stop
 			sudo "$HOME/.acme.sh/acme.sh" --cron --home "$HOME/.acme.sh"
-			sudo "$HOME/.acme.sh/acme.sh" --installcert -d "${currentHost}" --fullchainpath /etc/v2ray-agent/tls/"${currentHost}.crt" --keypath /etc/v2ray-agent/tls/"${currentHost}.key" --ecc
+			sudo "$HOME/.acme.sh/acme.sh" --installcert -d "${currentHost}" --fullchainpath /etc/ss-agent/tls/"${currentHost}.crt" --keypath /etc/ss-agent/tls/"${currentHost}.key" --ecc
 			reloadCore
 		else
 			echoContent green " ---> Certificate is valid"
@@ -1077,25 +1077,25 @@ installV2Ray() {
 
 		echoContent green " ---> v2ray-core version:${version}"
 		if wget --help | grep -q show-progress; then
-			wget -c -q --show-progress -P /etc/v2ray-agent/v2ray/ "https://github.com/v2fly/v2ray-core/releases/download/${version}/${v2rayCoreCPUVendor}.zip"
+			wget -c -q --show-progress -P /etc/ss-agent/v2ray/ "https://github.com/v2fly/v2ray-core/releases/download/${version}/${v2rayCoreCPUVendor}.zip"
 		else
-			wget -c -P /etc/v2ray-agent/v2ray/ "https://github.com/v2fly/v2ray-core/releases/download/${version}/${v2rayCoreCPUVendor}.zip" >/dev/null 2>&1
+			wget -c -P /etc/ss-agent/v2ray/ "https://github.com/v2fly/v2ray-core/releases/download/${version}/${v2rayCoreCPUVendor}.zip" >/dev/null 2>&1
 		fi
 
-		unzip -o /etc/v2ray-agent/v2ray/${v2rayCoreCPUVendor}.zip -d /etc/v2ray-agent/v2ray >/dev/null
-		rm -rf /etc/v2ray-agent/v2ray/${v2rayCoreCPUVendor}.zip
+		unzip -o /etc/ss-agent/v2ray/${v2rayCoreCPUVendor}.zip -d /etc/ss-agent/v2ray >/dev/null
+		rm -rf /etc/ss-agent/v2ray/${v2rayCoreCPUVendor}.zip
 	else
 		if [[ "${selectCoreType}" == "3" ]]; then
 			echoContent green " ---> lock v2ray-core version is v4.32.1"
-			rm -f /etc/v2ray-agent/v2ray/v2ray
-			rm -f /etc/v2ray-agent/v2ray/v2ctl
+			rm -f /etc/ss-agent/v2ray/v2ray
+			rm -f /etc/ss-agent/v2ray/v2ctl
 			installV2Ray "$1"
 		else
-			echoContent green " ---> v2ray-core version:$(/etc/v2ray-agent/v2ray/v2ray --version | awk '{print $2}' | head -1)"
+			echoContent green " ---> v2ray-core version:$(/etc/ss-agent/v2ray/v2ray --version | awk '{print $2}' | head -1)"
 			read -r -p "Is it updated, upgrade?[y/n]:" reInstallV2RayStatus
 			if [[ "${reInstallV2RayStatus}" == "y" ]]; then
-				rm -f /etc/v2ray-agent/v2ray/v2ray
-				rm -f /etc/v2ray-agent/v2ray/v2ctl
+				rm -f /etc/ss-agent/v2ray/v2ray
+				rm -f /etc/ss-agent/v2ray/v2ctl
 				installV2Ray "$1"
 			fi
 		fi
@@ -1113,19 +1113,19 @@ installXray() {
 
 		echoContent green " ---> Xray-core version:${version}"
 		if wget --help | grep -q show-progress; then
-			wget -c -q --show-progress -P /etc/v2ray-agent/xray/ "https://github.com/XTLS/Xray-core/releases/download/${version}/${xrayCoreCPUVendor}.zip"
+			wget -c -q --show-progress -P /etc/ss-agent/xray/ "https://github.com/XTLS/Xray-core/releases/download/${version}/${xrayCoreCPUVendor}.zip"
 		else
-			wget -c -P /etc/v2ray-agent/xray/ "https://github.com/XTLS/Xray-core/releases/download/${version}/${xrayCoreCPUVendor}.zip" >/dev/null 2>&1
+			wget -c -P /etc/ss-agent/xray/ "https://github.com/XTLS/Xray-core/releases/download/${version}/${xrayCoreCPUVendor}.zip" >/dev/null 2>&1
 		fi
 
-		unzip -o /etc/v2ray-agent/xray/${xrayCoreCPUVendor}.zip -d /etc/v2ray-agent/xray >/dev/null
-		rm -rf /etc/v2ray-agent/xray/${xrayCoreCPUVendor}.zip
-		chmod 655 /etc/v2ray-agent/xray/xray
+		unzip -o /etc/ss-agent/xray/${xrayCoreCPUVendor}.zip -d /etc/ss-agent/xray >/dev/null
+		rm -rf /etc/ss-agent/xray/${xrayCoreCPUVendor}.zip
+		chmod 655 /etc/ss-agent/xray/xray
 	else
-		echoContent green " ---> Xray-core version:$(/etc/v2ray-agent/xray/xray --version | awk '{print $2}' | head -1)"
+		echoContent green " ---> Xray-core version:$(/etc/ss-agent/xray/xray --version | awk '{print $2}' | head -1)"
 		read -r -p "Is it updated, upgrade?[y/n]:" reInstallXrayStatus
 		if [[ "${reInstallXrayStatus}" == "y" ]]; then
-			rm -f /etc/v2ray-agent/xray/xray
+			rm -f /etc/ss-agent/xray/xray
 			installXray "$1"
 		fi
 	fi
@@ -1135,23 +1135,23 @@ installXray() {
 installTrojanGo() {
 	echoContent skyBlue "\n progress  $1/${totalProgress} : Install Trojan-Go"
 
-	if ! ls /etc/v2ray-agent/trojan/ | grep -q trojan-go; then
+	if ! ls /etc/ss-agent/trojan/ | grep -q trojan-go; then
 
 		version=$(curl -s https://api.github.com/repos/p4gefau1t/trojan-go/releases | jq -r .[0].tag_name)
 		echoContent green " ---> Trojan-Go version:${version}"
 		if wget --help | grep -q show-progress; then
-			wget -c -q --show-progress -P /etc/v2ray-agent/trojan/ "https://github.com/p4gefau1t/trojan-go/releases/download/${version}/${trojanGoCPUVendor}.zip"
+			wget -c -q --show-progress -P /etc/ss-agent/trojan/ "https://github.com/p4gefau1t/trojan-go/releases/download/${version}/${trojanGoCPUVendor}.zip"
 		else
-			wget -c -P /etc/v2ray-agent/trojan/ "https://github.com/p4gefau1t/trojan-go/releases/download/${version}/${trojanGoCPUVendor}.zip" >/dev/null 2>&1
+			wget -c -P /etc/ss-agent/trojan/ "https://github.com/p4gefau1t/trojan-go/releases/download/${version}/${trojanGoCPUVendor}.zip" >/dev/null 2>&1
 		fi
-		unzip -o /etc/v2ray-agent/trojan/${trojanGoCPUVendor}.zip -d /etc/v2ray-agent/trojan >/dev/null
-		rm -rf /etc/v2ray-agent/trojan/${trojanGoCPUVendor}.zip
+		unzip -o /etc/ss-agent/trojan/${trojanGoCPUVendor}.zip -d /etc/ss-agent/trojan >/dev/null
+		rm -rf /etc/ss-agent/trojan/${trojanGoCPUVendor}.zip
 	else
-		echoContent green " ---> Trojan-Go version:$(/etc/v2ray-agent/trojan/trojan-go --version | awk '{print $2}' | head -1)"
+		echoContent green " ---> Trojan-Go version:$(/etc/ss-agent/trojan/trojan-go --version | awk '{print $2}' | head -1)"
 
 		read -r -p "Do you reinstall?[y/n]:" reInstallTrojanStatus
 		if [[ "${reInstallTrojanStatus}" == "y" ]]; then
-			rm -rf /etc/v2ray-agent/trojan/trojan-go*
+			rm -rf /etc/ss-agent/trojan/trojan-go*
 			installTrojanGo "$1"
 		fi
 	fi
@@ -1160,7 +1160,7 @@ installTrojanGo() {
 # V2Ray version management
 v2rayVersionManageMenu() {
 	echoContent skyBlue "\n progress  $1/${totalProgress} : V2Ray version management"
-	if [[ ! -d "/etc/v2ray-agent/v2ray/" ]]; then
+	if [[ ! -d "/etc/ss-agent/v2ray/" ]]; then
 		echoContent red " ---> No installation directory is detected, please perform script installation content"
 		menu
 		exit 0
@@ -1203,7 +1203,7 @@ v2rayVersionManageMenu() {
 # XRay version management
 xrayVersionManageMenu() {
 	echoContent skyBlue "\n progress  $1/${totalProgress} : XRay version management"
-	if [[ ! -d "/etc/v2ray-agent/xray/" ]]; then
+	if [[ ! -d "/etc/ss-agent/xray/" ]]; then
 		echoContent red " ---> No installation directory is detected, please perform script installation content"
 		menu
 		exit 0
@@ -1259,17 +1259,17 @@ updateV2Ray() {
 		echoContent green " ---> v2ray-Core version:${version}"
 
 		if wget --help | grep -q show-progress; then
-			wget -c -q --show-progress -P /etc/v2ray-agent/v2ray/ "https://github.com/v2fly/v2ray-core/releases/download/${version}/${v2rayCoreCPUVendor}.zip"
+			wget -c -q --show-progress -P /etc/ss-agent/v2ray/ "https://github.com/v2fly/v2ray-core/releases/download/${version}/${v2rayCoreCPUVendor}.zip"
 		else
-			wget -c -P "/etc/v2ray-agent/v2ray/ https://github.com/v2fly/v2ray-core/releases/download/${version}/${v2rayCoreCPUVendor}.zip" >/dev/null 2>&1
+			wget -c -P "/etc/ss-agent/v2ray/ https://github.com/v2fly/v2ray-core/releases/download/${version}/${v2rayCoreCPUVendor}.zip" >/dev/null 2>&1
 		fi
 
-		unzip -o /etc/v2ray-agent/v2ray/${v2rayCoreCPUVendor}.zip -d /etc/v2ray-agent/v2ray >/dev/null
-		rm -rf /etc/v2ray-agent/v2ray/${v2rayCoreCPUVendor}.zip
+		unzip -o /etc/ss-agent/v2ray/${v2rayCoreCPUVendor}.zip -d /etc/ss-agent/v2ray >/dev/null
+		rm -rf /etc/ss-agent/v2ray/${v2rayCoreCPUVendor}.zip
 		handleV2Ray stop
 		handleV2Ray start
 	else
-		echoContent green " ---> Current v2ray-Core version:$(/etc/v2ray-agent/v2ray/v2ray --version | awk '{print $2}' | head -1)"
+		echoContent green " ---> Current v2ray-Core version:$(/etc/ss-agent/v2ray/v2ray --version | awk '{print $2}' | head -1)"
 
 		if [[ -n "$1" ]]; then
 			version=$1
@@ -1284,24 +1284,24 @@ updateV2Ray() {
 			read -r -p "Retreat${version},Whether to continue?[y/n]:" rollbackV2RayStatus
 			if [[ "${rollbackV2RayStatus}" == "y" ]]; then
 				if [[ "${coreInstallType}" == "2" || "${coreInstallType}" == "3" ]]; then
-					echoContent green " ---> Current v2ray-Core version:$(/etc/v2ray-agent/v2ray/v2ray --version | awk '{print $2}' | head -1)"
+					echoContent green " ---> Current v2ray-Core version:$(/etc/ss-agent/v2ray/v2ray --version | awk '{print $2}' | head -1)"
 				elif [[ "${coreInstallType}" == "1" ]]; then
-					echoContent green " ---> Current Xray-Core version:$(/etc/v2ray-agent/xray/xray --version | awk '{print $2}' | head -1)"
+					echoContent green " ---> Current Xray-Core version:$(/etc/ss-agent/xray/xray --version | awk '{print $2}' | head -1)"
 				fi
 
 				handleV2Ray stop
-				rm -f /etc/v2ray-agent/v2ray/v2ray
-				rm -f /etc/v2ray-agent/v2ray/v2ctl
+				rm -f /etc/ss-agent/v2ray/v2ray
+				rm -f /etc/ss-agent/v2ray/v2ctl
 				updateV2Ray "${version}"
 			else
 				echoContent green " ---> Abandon the retreat version"
 			fi
-		elif [[ "${version}" == "v$(/etc/v2ray-agent/v2ray/v2ray --version | awk '{print $2}' | head -1)" ]]; then
+		elif [[ "${version}" == "v$(/etc/ss-agent/v2ray/v2ray --version | awk '{print $2}' | head -1)" ]]; then
 			read -r -p "The current version is the same as the latest version, is it reinstalled?[y/n]:" reInstallV2RayStatus
 			if [[ "${reInstallV2RayStatus}" == "y" ]]; then
 				handleV2Ray stop
-				rm -f /etc/v2ray-agent/v2ray/v2ray
-				rm -f /etc/v2ray-agent/v2ray/v2ctl
+				rm -f /etc/ss-agent/v2ray/v2ray
+				rm -f /etc/ss-agent/v2ray/v2ctl
 				updateV2Ray
 			else
 				echoContent green " ---> Abandon reinstall"
@@ -1309,8 +1309,8 @@ updateV2Ray() {
 		else
 			read -r -p "The latest version is:${version}Is it updated?[y/n]：" installV2RayStatus
 			if [[ "${installV2RayStatus}" == "y" ]]; then
-				rm -f /etc/v2ray-agent/v2ray/v2ray
-				rm -f /etc/v2ray-agent/v2ray/v2ctl
+				rm -f /etc/ss-agent/v2ray/v2ray
+				rm -f /etc/ss-agent/v2ray/v2ctl
 				updateV2Ray
 			else
 				echoContent green " ---> Give up update"
@@ -1333,18 +1333,18 @@ updateXray() {
 		echoContent green " ---> Xray-Core version:${version}"
 
 		if wget --help | grep -q show-progress; then
-			wget -c -q --show-progress -P /etc/v2ray-agent/xray/ "https://github.com/XTLS/Xray-core/releases/download/${version}/${xrayCoreCPUVendor}.zip"
+			wget -c -q --show-progress -P /etc/ss-agent/xray/ "https://github.com/XTLS/Xray-core/releases/download/${version}/${xrayCoreCPUVendor}.zip"
 		else
-			wget -c -P /etc/v2ray-agent/xray/ "https://github.com/XTLS/Xray-core/releases/download/${version}/${xrayCoreCPUVendor}.zip" >/dev/null 2>&1
+			wget -c -P /etc/ss-agent/xray/ "https://github.com/XTLS/Xray-core/releases/download/${version}/${xrayCoreCPUVendor}.zip" >/dev/null 2>&1
 		fi
 
-		unzip -o /etc/v2ray-agent/xray/${xrayCoreCPUVendor}.zip -d /etc/v2ray-agent/xray >/dev/null
-		rm -rf /etc/v2ray-agent/xray/${xrayCoreCPUVendor}.zip
-		chmod 655 /etc/v2ray-agent/xray/xray
+		unzip -o /etc/ss-agent/xray/${xrayCoreCPUVendor}.zip -d /etc/ss-agent/xray >/dev/null
+		rm -rf /etc/ss-agent/xray/${xrayCoreCPUVendor}.zip
+		chmod 655 /etc/ss-agent/xray/xray
 		handleXray stop
 		handleXray start
 	else
-		echoContent green " ---> Current Xray-Core version:$(/etc/v2ray-agent/xray/xray --version | awk '{print $2}' | head -1)"
+		echoContent green " ---> Current Xray-Core version:$(/etc/ss-agent/xray/xray --version | awk '{print $2}' | head -1)"
 
 		if [[ -n "$1" ]]; then
 			version=$1
@@ -1355,20 +1355,20 @@ updateXray() {
 		if [[ -n "$1" ]]; then
 			read -r -p "Retreat${version},Whether to continue?[y/n]:" rollbackXrayStatus
 			if [[ "${rollbackXrayStatus}" == "y" ]]; then
-				echoContent green " ---> Current Xray-Core version:$(/etc/v2ray-agent/xray/xray --version | awk '{print $2}' | head -1)"
+				echoContent green " ---> Current Xray-Core version:$(/etc/ss-agent/xray/xray --version | awk '{print $2}' | head -1)"
 
 				handleXray stop
-				rm -f /etc/v2ray-agent/xray/xray
+				rm -f /etc/ss-agent/xray/xray
 				updateXray "${version}"
 			else
 				echoContent green " ---> Abandon the retreat version"
 			fi
-		elif [[ "${version}" == "v$(/etc/v2ray-agent/xray/xray --version | awk '{print $2}' | head -1)" ]]; then
+		elif [[ "${version}" == "v$(/etc/ss-agent/xray/xray --version | awk '{print $2}' | head -1)" ]]; then
 			read -r -p "The current version is the same as the latest version, is it reinstalled?[y/n]:" reInstallXrayStatus
 			if [[ "${reInstallXrayStatus}" == "y" ]]; then
 				handleXray stop
-				rm -f /etc/v2ray-agent/xray/xray
-				rm -f /etc/v2ray-agent/xray/xray
+				rm -f /etc/ss-agent/xray/xray
+				rm -f /etc/ss-agent/xray/xray
 				updateXray
 			else
 				echoContent green " ---> Abandon reinstall"
@@ -1376,7 +1376,7 @@ updateXray() {
 		else
 			read -r -p "The latest version is:${version}Is it updated?[y/n]：" installXrayStatus
 			if [[ "${installXrayStatus}" == "y" ]]; then
-				rm -f /etc/v2ray-agent/xray/xray
+				rm -f /etc/ss-agent/xray/xray
 				updateXray
 			else
 				echoContent green " ---> Give up update"
@@ -1407,7 +1407,7 @@ installV2RayService() {
 	if [[ -n $(find /bin /usr/bin -name "systemctl") ]]; then
 		rm -rf /etc/systemd/system/v2ray.service
 		touch /etc/systemd/system/v2ray.service
-		execStart='/etc/v2ray-agent/v2ray/v2ray -confdir /etc/v2ray-agent/v2ray/conf'
+		execStart='/etc/ss-agent/v2ray/v2ray -confdir /etc/ss-agent/v2ray/conf'
 		cat <<EOF >/etc/systemd/system/v2ray.service
 [Unit]
 Description=V2Ray - A unified platform for anti-censorship
@@ -1440,7 +1440,7 @@ installXrayService() {
 	if [[ -n $(find /bin /usr/bin -name "systemctl") ]]; then
 		rm -rf /etc/systemd/system/xray.service
 		touch /etc/systemd/system/xray.service
-		execStart='/etc/v2ray-agent/xray/xray run -confdir /etc/v2ray-agent/xray/conf'
+		execStart='/etc/ss-agent/xray/xray run -confdir /etc/ss-agent/xray/conf'
 		cat <<EOF >/etc/systemd/system/xray.service
 [Unit]
 Description=Xray - A unified platform for anti-censorship
@@ -1485,7 +1485,7 @@ Type=simple
 User=root
 CapabilityBoundingSet=CAP_NET_BIND_SERVICE CAP_NET_RAW
 NoNewPrivileges=yes
-ExecStart=/etc/v2ray-agent/trojan/trojan-go -config /etc/v2ray-agent/trojan/config_full.json
+ExecStart=/etc/ss-agent/trojan/trojan-go -config /etc/ss-agent/trojan/config_full.json
 Restart=on-failure
 RestartPreventExitStatus=23
 
@@ -1515,7 +1515,7 @@ handleV2Ray() {
 			echoContent green " ---> V2Ray starts success"
 		else
 			echoContent red "V2Ray starts failed"
-			echoContent red "Please manually【/etc/v2ray-agent/v2ray/v2ray -confdir /etc/v2ray-agent/v2ray/conf】，View the error log"
+			echoContent red "Please manually【/etc/ss-agent/v2ray/v2ray -confdir /etc/ss-agent/v2ray/conf】，View the error log"
 			exit 0
 		fi
 	elif [[ "$1" == "stop" ]]; then
@@ -1545,7 +1545,7 @@ handleXray() {
 			echoContent green " ---> Xray started successfully"
 		else
 			echoContent red "XRay start failed"
-			echoContent red "Please manually【/etc/v2ray-agent/xray/xray -confdir /etc/v2ray-agent/xray/conf】，View the error log"
+			echoContent red "Please manually【/etc/ss-agent/xray/xray -confdir /etc/ss-agent/xray/conf】，View the error log"
 			exit 0
 		fi
 	elif [[ "$1" == "stop" ]]; then
@@ -1575,7 +1575,7 @@ handleTrojanGo() {
 			echoContent green " ---> Trojan-GO starts success"
 		else
 			echoContent red "Trojan-Go failed to start"
-			echoContent red "Please manually【/etc/v2ray-agent/trojan/trojan-go -config /etc/v2ray-agent/trojan/config_full.json】，View the error log"
+			echoContent red "Please manually【/etc/ss-agent/trojan/trojan-go -config /etc/ss-agent/trojan/config_full.json】，View the error log"
 			exit 0
 		fi
 	elif [[ "$1" == "stop" ]]; then
@@ -1608,31 +1608,31 @@ initV2RayConfig() {
 		if [[ "${historyUUIDStatus}" == "y" ]]; then
 			uuid=${currentUUID}
 		else
-			uuid=$(/etc/v2ray-agent/v2ray/v2ctl uuid)
+			uuid=$(/etc/ss-agent/v2ray/v2ctl uuid)
 		fi
 	elif [[ -z "${uuid}" ]]; then
-		uuid=$(/etc/v2ray-agent/v2ray/v2ctl uuid)
+		uuid=$(/etc/ss-agent/v2ray/v2ctl uuid)
 	fi
 
 	if [[ -z "${uuid}" ]]; then
 		echoContent red "\n ---> uuid Read error，regenerate"
-		uuid=$(/etc/v2ray-agent/v2ray/v2ctl uuid)
+		uuid=$(/etc/ss-agent/v2ray/v2ctl uuid)
 	fi
 
-	rm -rf /etc/v2ray-agent/v2ray/conf/*
-	rm -rf /etc/v2ray-agent/v2ray/config_full.json
+	rm -rf /etc/ss-agent/v2ray/conf/*
+	rm -rf /etc/ss-agent/v2ray/config_full.json
 
-	cat <<EOF >/etc/v2ray-agent/v2ray/conf/00_log.json
+	cat <<EOF >/etc/ss-agent/v2ray/conf/00_log.json
 {
   "log": {
-    "error": "/etc/v2ray-agent/v2ray/error.log",
+    "error": "/etc/ss-agent/v2ray/error.log",
     "loglevel": "warning"
   }
 }
 EOF
 	# outbounds
 	if [[ -n "${pingIPv6}" ]]; then
-		cat <<EOF >/etc/v2ray-agent/v2ray/conf/10_ipv6_outbounds.json
+		cat <<EOF >/etc/ss-agent/v2ray/conf/10_ipv6_outbounds.json
 {
     "outbounds": [
         {
@@ -1645,7 +1645,7 @@ EOF
 EOF
 	else
 
-		cat <<EOF >/etc/v2ray-agent/v2ray/conf/10_ipv4_outbounds.json
+		cat <<EOF >/etc/ss-agent/v2ray/conf/10_ipv4_outbounds.json
 {
     "outbounds":[
         {
@@ -1673,7 +1673,7 @@ EOF
 
 
 	# dns
-	cat <<EOF >/etc/v2ray-agent/v2ray/conf/11_dns.json
+	cat <<EOF >/etc/ss-agent/v2ray/conf/11_dns.json
 {
     "dns": {
         "servers": [
@@ -1688,7 +1688,7 @@ EOF
 
 if [[ -n $(echo "${selectCustomInstallType}" | grep 4) || "$1" == "all" ]]; then
 		fallbacksList='{"dest":31296,"xver":1},{"alpn":"h2","dest":31302,"xver":0}'
-cat <<EOF >/etc/v2ray-agent/v2ray/conf/04_trojan_TCP_inbounds.json
+cat <<EOF >/etc/ss-agent/v2ray/conf/04_trojan_TCP_inbounds.json
 {
 "inbounds":[
 	{
@@ -1723,7 +1723,7 @@ EOF
 	# VLESS_WS_TLS
 	if echo "${selectCustomInstallType}" | grep -q 1 || [[ "$1" == "all" ]]; then
 		fallbacksList=${fallbacksList}',{"path":"/'${customPath}'ws","dest":31297,"xver":1}'
-		cat <<EOF >/etc/v2ray-agent/v2ray/conf/03_VLESS_WS_inbounds.json
+		cat <<EOF >/etc/ss-agent/v2ray/conf/03_VLESS_WS_inbounds.json
 {
 "inbounds":[
     {
@@ -1758,7 +1758,7 @@ EOF
 	# VMess_WS
 	if echo "${selectCustomInstallType}" | grep -q 3 || [[ "$1" == "all" ]]; then
 		fallbacksList=${fallbacksList}',{"path":"/'${customPath}'vws","dest":31299,"xver":1}'
-		cat <<EOF >/etc/v2ray-agent/v2ray/conf/05_VMess_WS_inbounds.json
+		cat <<EOF >/etc/ss-agent/v2ray/conf/05_VMess_WS_inbounds.json
 {
 "inbounds":[
 {
@@ -1791,7 +1791,7 @@ EOF
 	fi
 	# VLESS gRPC
 	if echo "${selectCustomInstallType}" | grep -q 5 || [[ "$1" == "all" ]]; then
-		cat <<EOF >/etc/v2ray-agent/v2ray/conf/06_VLESS_gRPC_inbounds.json
+		cat <<EOF >/etc/ss-agent/v2ray/conf/06_VLESS_gRPC_inbounds.json
 {
     "inbounds":[
     {
@@ -1823,7 +1823,7 @@ EOF
 
 	# VLESS_TCP
 	if [[ "${selectCoreType}" == "2" ]]; then
-		cat <<EOF >/etc/v2ray-agent/v2ray/conf/02_VLESS_TCP_inbounds.json
+		cat <<EOF >/etc/ss-agent/v2ray/conf/02_VLESS_TCP_inbounds.json
 {
   "inbounds":[
     {
@@ -1853,8 +1853,8 @@ EOF
           ],
           "certificates": [
             {
-              "certificateFile": "/etc/v2ray-agent/tls/${domain}.crt",
-              "keyFile": "/etc/v2ray-agent/tls/${domain}.key"
+              "certificateFile": "/etc/ss-agent/tls/${domain}.crt",
+              "keyFile": "/etc/ss-agent/tls/${domain}.key"
             }
           ]
         }
@@ -1864,7 +1864,7 @@ EOF
 }
 EOF
 	elif [[ "${selectCoreType}" == "3" ]]; then
-		cat <<EOF >/etc/v2ray-agent/v2ray/conf/02_VLESS_TCP_inbounds.json
+		cat <<EOF >/etc/ss-agent/v2ray/conf/02_VLESS_TCP_inbounds.json
 {
 "inbounds":[
 {
@@ -1894,8 +1894,8 @@ EOF
       ],
       "certificates": [
         {
-          "certificateFile": "/etc/v2ray-agent/tls/${domain}.crt",
-          "keyFile": "/etc/v2ray-agent/tls/${domain}.key"
+          "certificateFile": "/etc/ss-agent/tls/${domain}.crt",
+          "keyFile": "/etc/ss-agent/tls/${domain}.key"
         }
       ]
     }
@@ -1977,7 +1977,7 @@ initXrayConfig() {
 			uuid=${currentUUID}
 			echoContent green "\n ---> 使用成功"
 		else
-			uuid=$(/etc/v2ray-agent/xray/xray uuid)
+			uuid=$(/etc/ss-agent/xray/xray uuid)
 		fi
 	fi
 
@@ -1988,25 +1988,25 @@ initXrayConfig() {
 		if [[ -n ${customUUID} ]];then
 			uuid=${customUUID}
 		else
-			uuid=$(/etc/v2ray-agent/xray/xray uuid)
+			uuid=$(/etc/ss-agent/xray/xray uuid)
 		fi
 
 	fi
 
 	if [[ -z "${uuid}" ]]; then
 		echoContent red "\n ---> UUID read error, regenerate"
-		uuid=$(/etc/v2ray-agent/xray/xray uuid)
+		uuid=$(/etc/ss-agent/xray/xray uuid)
 	fi
 
 	echoContent yellow "\n ${uuid}"
 
-	rm -rf /etc/v2ray-agent/xray/conf/*
+	rm -rf /etc/ss-agent/xray/conf/*
 
 	# log
-	cat <<EOF >/etc/v2ray-agent/xray/conf/00_log.json
+	cat <<EOF >/etc/ss-agent/xray/conf/00_log.json
 {
   "log": {
-    "error": "/etc/v2ray-agent/xray/error.log",
+    "error": "/etc/ss-agent/xray/error.log",
     "loglevel": "warning"
   }
 }
@@ -2014,7 +2014,7 @@ EOF
 
 	# outbounds
 	if [[ -n "${pingIPv6}" ]]; then
-		cat <<EOF >/etc/v2ray-agent/xray/conf/10_ipv6_outbounds.json
+		cat <<EOF >/etc/ss-agent/xray/conf/10_ipv6_outbounds.json
 {
     "outbounds": [
         {
@@ -2027,7 +2027,7 @@ EOF
 EOF
 
 	else
-		cat <<EOF >/etc/v2ray-agent/xray/conf/10_ipv4_outbounds.json
+		cat <<EOF >/etc/ss-agent/xray/conf/10_ipv4_outbounds.json
 {
     "outbounds":[
         {
@@ -2055,7 +2055,7 @@ EOF
 
 
 	# dns
-	cat <<EOF >/etc/v2ray-agent/xray/conf/11_dns.json
+	cat <<EOF >/etc/ss-agent/xray/conf/11_dns.json
 {
     "dns": {
         "servers": [
@@ -2072,7 +2072,7 @@ EOF
 	# trojan
 	if [[ -n $(echo "${selectCustomInstallType}" | grep 4) || "$1" == "all" ]]; then
 		fallbacksList='{"dest":31296,"xver":1},{"alpn":"h2","dest":31302,"xver":0}'
-		cat <<EOF >/etc/v2ray-agent/xray/conf/04_trojan_TCP_inbounds.json
+		cat <<EOF >/etc/ss-agent/xray/conf/04_trojan_TCP_inbounds.json
 {
 "inbounds":[
 	{
@@ -2107,7 +2107,7 @@ EOF
 	# VLESS_WS_TLS
 	if echo "${selectCustomInstallType}" | grep -q 1 || [[ "$1" == "all" ]]; then
 		fallbacksList=${fallbacksList}',{"path":"/'${customPath}'ws","dest":31297,"xver":1}'
-		cat <<EOF >/etc/v2ray-agent/xray/conf/03_VLESS_WS_inbounds.json
+		cat <<EOF >/etc/ss-agent/xray/conf/03_VLESS_WS_inbounds.json
 {
 "inbounds":[
     {
@@ -2145,7 +2145,7 @@ EOF
 			fallbacksList=${fallbacksList//31302/31304}
 		fi
 
-		cat <<EOF >/etc/v2ray-agent/xray/conf/04_trojan_gRPC_inbounds.json
+		cat <<EOF >/etc/ss-agent/xray/conf/04_trojan_gRPC_inbounds.json
 {
     "inbounds": [
         {
@@ -2182,7 +2182,7 @@ EOF
 	# VMess_WS
 	if echo "${selectCustomInstallType}" | grep -q 3 || [[ "$1" == "all" ]]; then
 		fallbacksList=${fallbacksList}',{"path":"/'${customPath}'vws","dest":31299,"xver":1}'
-		cat <<EOF >/etc/v2ray-agent/xray/conf/05_VMess_WS_inbounds.json
+		cat <<EOF >/etc/ss-agent/xray/conf/05_VMess_WS_inbounds.json
 {
 "inbounds":[
 {
@@ -2215,7 +2215,7 @@ EOF
 	fi
 
 	if echo "${selectCustomInstallType}" | grep -q 5 || [[ "$1" == "all" ]]; then
-		cat <<EOF >/etc/v2ray-agent/xray/conf/06_VLESS_gRPC_inbounds.json
+		cat <<EOF >/etc/ss-agent/xray/conf/06_VLESS_gRPC_inbounds.json
 {
     "inbounds":[
     {
@@ -2246,7 +2246,7 @@ EOF
 	fi
 
 	# VLESS_TCP
-	cat <<EOF >/etc/v2ray-agent/xray/conf/02_VLESS_TCP_inbounds.json
+	cat <<EOF >/etc/ss-agent/xray/conf/02_VLESS_TCP_inbounds.json
 {
 "inbounds":[
 {
@@ -2278,8 +2278,8 @@ EOF
       ],
       "certificates": [
         {
-          "certificateFile": "/etc/v2ray-agent/tls/${domain}.crt",
-          "keyFile": "/etc/v2ray-agent/tls/${domain}.key",
+          "certificateFile": "/etc/ss-agent/tls/${domain}.crt",
+          "keyFile": "/etc/ss-agent/tls/${domain}.key",
           "ocspStapling": 3600,
           "usage":"encipherment"
         }
@@ -2296,7 +2296,7 @@ EOF
 initTrojanGoConfig() {
 
 	echoContent skyBlue "\n schedule $1/${totalProgress} : Initialization Trojan configuration"
-	cat <<EOF >/etc/v2ray-agent/trojan/config_full.json
+	cat <<EOF >/etc/ss-agent/trojan/config_full.json
 {
     "run_type": "server",
     "local_addr": "127.0.0.1",
@@ -2305,7 +2305,7 @@ initTrojanGoConfig() {
     "remote_port": 31300,
     "disable_http_check":true,
     "log_level":3,
-    "log_file":"/etc/v2ray-agent/trojan/trojan.log",
+    "log_file":"/etc/ss-agent/trojan/trojan.log",
     "password": [
         "${uuid}"
     ],
@@ -2335,7 +2335,7 @@ customCDNIP() {
 	echoContent red "\n=============================================================="
 	echoContent yellow "# Cautions"
 	echoContent yellow "\n Tutorial Address:"
-	echoContent skyBlue "https://github.com/mack-a/v2ray-agent/blob/master/documents/optimize_V2Ray.md"
+	echoContent skyBlue "https://github.com/mack-a/ss-agent/blob/master/documents/optimize_V2Ray.md"
 	echoContent red "\n If you do not know about Cloudflare optimization, please do not use"
 	echoContent yellow "\n 1.china Mobile:104.16.123.96"
 	echoContent yellow " 2.china Unicom:www.cloudflare.com"
@@ -2386,7 +2386,7 @@ defaultBase64Code() {
 
 			echoContent yellow " ---> Format clear text(VLESS+TCP+TLS/xtls-rprx-direct)"
 			echoContent green "agreement type：VLESS，address：${host}，port：${port}，user ID：${id}，Safety：xtls，transfer method：tcp，flow：xtls-rprx-direct，account name:${email}\n"
-			cat <<EOF >>"/etc/v2ray-agent/subscribe_tmp/${subAccount}"
+			cat <<EOF >>"/etc/ss-agent/subscribe_tmp/${subAccount}"
 vless://${id}@${host}:${port}?encryption=none&security=xtls&type=tcp&host=${host}&headerType=none&sni=${host}&flow=xtls-rprx-direct#${email}
 EOF
 			echoContent yellow " ---> QR code VLESS(VLESS+TCP+TLS/xtls-rprx-direct)"
@@ -2399,7 +2399,7 @@ EOF
 
 			echoContent yellow " ---> Format clear text(VLESS+TCP+TLS/xtls-rprx-splice)"
 			echoContent green "    agreement type：VLESS，address：${host}，port：${port}，user ID：${id}，Safety：xtls，transfer method：tcp，flow：xtls-rprx-splice，account name:${email}\n"
-			cat <<EOF >>"/etc/v2ray-agent/subscribe_tmp/${subAccount}"
+			cat <<EOF >>"/etc/ss-agent/subscribe_tmp/${subAccount}"
 vless://${id}@${host}:${port}?encryption=none&security=xtls&type=tcp&host=${host}&headerType=none&sni=${host}&flow=xtls-rprx-splice#${email}
 EOF
 			echoContent yellow " ---> QR code VLESS(VLESS+TCP+TLS/xtls-rprx-splice)"
@@ -2412,7 +2412,7 @@ EOF
 			echoContent yellow " ---> Format clear text(VLESS+TCP+TLS/xtls-rprx-splice)"
 			echoContent green "    agreement type：VLESS，address：${host}，port：${port}，user ID：${id}, Safety: TLS, Transmission mode: TCP, account name:${email}\n"
 
-			cat <<EOF >>"/etc/v2ray-agent/subscribe_tmp/${subAccount}"
+			cat <<EOF >>"/etc/ss-agent/subscribe_tmp/${subAccount}"
 vless://${id}@${host}:${port}?security=tls&encryption=none&host=${host}&headerType=none&type=tcp#${email}
 EOF
 			echoContent yellow " ---> QR code VLESS(VLESS+TCP+TLS)"
@@ -2425,7 +2425,7 @@ EOF
 
 			echoContent yellow " ---> Format clear text(Trojan+TCP+TLS/xtls-rprx-direct)"
 			echoContent green "Type: Trojan, address：${host}，port：${port}，user ID：${id}，Safety：xtls，transfer method：tcp，flow：xtls-rprx-direct，account name:${email}\n"
-			cat <<EOF >>"/etc/v2ray-agent/subscribe_tmp/${subAccount}"
+			cat <<EOF >>"/etc/ss-agent/subscribe_tmp/${subAccount}"
 trojan://${id}@${host}:${port}?encryption=none&security=xtls&type=tcp&host=${host}&headerType=none&sni=${host}&flow=xtls-rprx-direct#${email}
 EOF
 			echoContent yellow " ---> QR code Trojan(Trojan+TCP+TLS/xtls-rprx-direct)"
@@ -2438,7 +2438,7 @@ EOF
 
 			echoContent yellow " ---> Format clear text(Trojan+TCP+TLS/xtls-rprx-splice)"
 			echoContent green "    agreement type：VLESS，address：${host}，port：${port}，user ID：${id}，Safety：xtls，transfer method：tcp，flow：xtls-rprx-splice，account name:${email}\n"
-			cat <<EOF >>"/etc/v2ray-agent/subscribe_tmp/${subAccount}"
+			cat <<EOF >>"/etc/ss-agent/subscribe_tmp/${subAccount}"
 trojan://${id}@${host}:${port}?encryption=none&security=xtls&type=tcp&host=${host}&headerType=none&sni=${host}&flow=xtls-rprx-splice#${email}
 EOF
 			echoContent yellow " ---> QR code Trojan(Trojan+TCP+TLS/xtls-rprx-splice)"
@@ -2456,7 +2456,7 @@ EOF
 		echoContent green "    vmess://${qrCodeBase64Default}\n"
 		echoContent yellow " ---> QR code vmess(VMess+WS+TLS)"
 
-		cat <<EOF >>"/etc/v2ray-agent/subscribe_tmp/${subAccount}"
+		cat <<EOF >>"/etc/ss-agent/subscribe_tmp/${subAccount}"
 vmess://${qrCodeBase64Default}
 EOF
 		echoContent green "    https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=vmess://${qrCodeBase64Default}\n"
@@ -2470,7 +2470,7 @@ EOF
 #
 #		echoContent yellow " ---> 格式化明文(vmess+http+tls)"
 #		echoContent green "协议类型：vmess，地址：${host}，端口：${port}，用户ID：${id}，安全：tls，传输方式：http，账户名:${ps}\n"
-#		cat <<EOF >>"/etc/v2ray-agent/subscribe_tmp/${subAccount}"
+#		cat <<EOF >>"/etc/ss-agent/subscribe_tmp/${subAccount}"
 #vmess://http+tls:${id}-0@${add}:${port}/?path=/${path}&tlsServerName=${host}&alpn=http1.1#${ps}
 #EOF
 #		echoContent yellow " ---> 二维码 vmess(http+tls)"
@@ -2485,7 +2485,7 @@ EOF
 		echoContent yellow " ---> Universalvmess(VMess+TCP+TLS)Link"
 		echoContent green "    vmess://${qrCodeBase64Default}\n"
 
-		cat <<EOF >>"/etc/v2ray-agent/subscribe_tmp/${subAccount}"
+		cat <<EOF >>"/etc/ss-agent/subscribe_tmp/${subAccount}"
 vmess://${qrCodeBase64Default}
 EOF
 		echoContent yellow " ---> QR code vmess(VMess+TCP+TLS)"
@@ -2499,7 +2499,7 @@ EOF
 		echoContent yellow " ---> Format clear text(VLESS+WS+TLS)"
 		echoContent green "    agreement type：VLESS，address：${add}，Camouflage domain name/SNI：${host}，port：${port}，user ID：${id}，Safety：tls，transfer method：ws，path:/${path}，account name:${email}\n"
 
-		cat <<EOF >>"/etc/v2ray-agent/subscribe_tmp/${subAccount}"
+		cat <<EOF >>"/etc/ss-agent/subscribe_tmp/${subAccount}"
 vless://${id}@${add}:${port}?encryption=none&security=tls&type=ws&host=${host}&sni=${host}&path=%2f${path}#${email}
 EOF
 
@@ -2514,7 +2514,7 @@ EOF
 		echoContent yellow " ---> Format clear text(VLESS+gRPC+TLS)"
 		echoContent green "    agreement type：VLESS，address：${add}，Camouflage domain name/SNI：${host}，port：${port}，user ID：${id}，Safety：tls，transfer method：gRPC，alpn：h2，serviceName:${path}，account name:${email}\n"
 
-		cat <<EOF >>"/etc/v2ray-agent/subscribe_tmp/${subAccount}"
+		cat <<EOF >>"/etc/ss-agent/subscribe_tmp/${subAccount}"
 vless://${id}@${add}:${port}?encryption=none&security=tls&type=grpc&host=${host}&path=${path}&serviceName=${path}&alpn=h2&sni=${host}#${email}
 EOF
 		echoContent yellow " ---> QR code VLESS(VLESS+gRPC+TLS)"
@@ -2525,7 +2525,7 @@ EOF
 		echoContent yellow " ---> Trojan(TLS)"
 		echoContent green "    trojan://${id}@${host}:${port}?peer=${host}&sni=${host}&alpn=http1.1#${host}_Trojan\n"
 
-		cat <<EOF >>"/etc/v2ray-agent/subscribe_tmp/${subAccount}"
+		cat <<EOF >>"/etc/ss-agent/subscribe_tmp/${subAccount}"
 trojan://${id}@${host}:${port}?peer=${host}&sni=${host}&alpn=http1.1#${host}_Trojan
 EOF
 		echoContent yellow " ---> QR code Trojan(TLS)"
@@ -2537,7 +2537,7 @@ EOF
 		echoContent yellow " ---> Trojan gRPC(TLS)"
 		echoContent green "    trojan://${id}@${host}:${port}?encryption=none&peer=${host}&security=tls&type=grpc&sni=${host}&alpn=h2&path=${path}&serviceName=${path}#${host}_Trojan_gRPC\n"
 
-		cat <<EOF >>"/etc/v2ray-agent/subscribe_tmp/${subAccount}"
+		cat <<EOF >>"/etc/ss-agent/subscribe_tmp/${subAccount}"
 trojan://${id}@${host}:${port}?encryption=none&peer=${host}&security=tls&type=grpc&sni=${host}&alpn=h2&path=${path}&serviceName=${path}#${host}_Trojan_gRPC
 EOF
 		echoContent yellow " ---> QR code Trojan gRPC(TLS)"
@@ -2548,7 +2548,7 @@ EOF
 		echoContent yellow " ---> Trojan-Go(WS+TLS) Shadowrocket"
 		echoContent green "    trojan://${id}@${add}:${port}?allowInsecure=0&&peer=${host}&sni=${host}&plugin=obfs-local;obfs=websocket;obfs-host=${host};obfs-uri=${path}#${host}_Trojan_ws\n"
 
-		cat <<EOF >>"/etc/v2ray-agent/subscribe_tmp/${subAccount}"
+		cat <<EOF >>"/etc/ss-agent/subscribe_tmp/${subAccount}"
 trojan://${id}@${add}:${port}?allowInsecure=0&&peer=${host}&sni=${host}&plugin=obfs-local;obfs=websocket;obfs-host=${host};obfs-uri=${path}#${host}_Trojan_ws
 EOF
 		echoContent yellow " ---> QR code Trojan-Go(WS+TLS) Shadowrocket"
@@ -2557,7 +2557,7 @@ EOF
 		path=$(echo "${path}" | awk -F "[/]" '{print $2}')
 		echoContent yellow " ---> Trojan-Go(WS+TLS) QV2ray"
 
-		cat <<EOF >>"/etc/v2ray-agent/subscribe_tmp/${subAccount}"
+		cat <<EOF >>"/etc/ss-agent/subscribe_tmp/${subAccount}"
 trojan-go://${id}@${add}:${port}?sni=${host}&type=ws&host=${host}&path=%2F${path}#${host}_Trojan_ws
 EOF
 
@@ -2686,9 +2686,9 @@ updateNginxBlog() {
 #		rm -rf /usr/share/nginx/html
 		rm -rf /usr/share/nginx/*
 		if wget --help | grep -q show-progress; then
-			wget -c -q --show-progress -P /usr/share/nginx "https://raw.githubusercontent.com/mack-a/v2ray-agent/master/fodder/blog/unable/html${selectInstallNginxBlogType}.zip" >/dev/null
+			wget -c -q --show-progress -P /usr/share/nginx "https://raw.githubusercontent.com/mack-a/ss-agent/master/fodder/blog/unable/html${selectInstallNginxBlogType}.zip" >/dev/null
 		else
-			wget -c -P /usr/share/nginx "https://raw.githubusercontent.com/mack-a/v2ray-agent/master/fodder/blog/unable/html${selectInstallNginxBlogType}.zip" >/dev/null
+			wget -c -P /usr/share/nginx "https://raw.githubusercontent.com/mack-a/ss-agent/master/fodder/blog/unable/html${selectInstallNginxBlogType}.zip" >/dev/null
 		fi
 
 		unzip -o "/usr/share/nginx/html${selectInstallNginxBlogType}.zip" -d /usr/share/nginx/html >/dev/null
@@ -2782,20 +2782,20 @@ unInstall() {
 
 	rm -rf /etc/systemd/system/trojan-go.service
 	echoContent green " ---> Delete Trojan-GO boot self-start"
-	rm -rf /tmp/v2ray-agent-tls/*
-	if [[ -d "/etc/v2ray-agent/tls" ]] && [[ -n $(find /etc/v2ray-agent/tls/ -name "*.key") ]] && [[ -n $(find /etc/v2ray-agent/tls/ -name "*.crt") ]]; then
-		mv /etc/v2ray-agent/tls /tmp/v2ray-agent-tls
-		if [[ -n $(find /tmp/v2ray-agent-tls -name '*.key') ]]; then
-			echoContent yellow " ---> Keep paying attention to the backup certificate.[/tmp/v2ray-agent-tls]"
+	rm -rf /tmp/ss-agent-tls/*
+	if [[ -d "/etc/ss-agent/tls" ]] && [[ -n $(find /etc/ss-agent/tls/ -name "*.key") ]] && [[ -n $(find /etc/ss-agent/tls/ -name "*.crt") ]]; then
+		mv /etc/ss-agent/tls /tmp/ss-agent-tls
+		if [[ -n $(find /tmp/ss-agent-tls -name '*.key') ]]; then
+			echoContent yellow " ---> Keep paying attention to the backup certificate.[/tmp/ss-agent-tls]"
 		fi
 	fi
 
-	rm -rf /etc/v2ray-agent
+	rm -rf /etc/ss-agent
 	rm -rf /etc/nginx/conf.d/alone.conf
 	rm -rf /usr/bin/vasma
 	rm -rf /usr/sbin/vasma
 	echoContent green " ---> Uninstall shortcut"
-	echoContent green " ---> Uninstall V2RAY-Agent script completion"
+	echoContent green " ---> Uninstall ss-agent script completion"
 }
 
 # Modify V2RAY CDN node
@@ -2873,12 +2873,12 @@ customUUID() {
 			local repeat=
 			jq -r -c '.inbounds[0].settings.clients[].id' ${configPath}${frontingType}.json | while read -r line; do
 				if [[ "${line}" == "${currentCustomUUID}" ]]; then
-					echo repeat >/tmp/v2ray-agent
+					echo repeat >/tmp/ss-agent
 				fi
 			done
-			if [[ -f "/tmp/v2ray-agent" && -n $(cat /tmp/v2ray-agent) ]]; then
+			if [[ -f "/tmp/ss-agent" && -n $(cat /tmp/ss-agent) ]]; then
 				echoContent red " ---> UUID is not repeatable"
-				rm /tmp/v2ray-agent
+				rm /tmp/ss-agent
 				exit 0
 			fi
 		fi
@@ -2898,12 +2898,12 @@ customUserEmail() {
 			local repeat=
 			jq -r -c '.inbounds[0].settings.clients[].email' ${configPath}${frontingType}.json | while read -r line; do
 				if [[ "${line}" == "${currentCustomEmail}" ]]; then
-					echo repeat >/tmp/v2ray-agent
+					echo repeat >/tmp/ss-agent
 				fi
 			done
-			if [[ -f "/tmp/v2ray-agent" && -n $(cat /tmp/v2ray-agent) ]]; then
+			if [[ -f "/tmp/ss-agent" && -n $(cat /tmp/ss-agent) ]]; then
 				echoContent red " ---> Email is not repeatable"
-				rm /tmp/v2ray-agent
+				rm /tmp/ss-agent
 				exit 0
 			fi
 		fi
@@ -3094,22 +3094,22 @@ removeUser() {
 }
 # Update script
 updateV2RayAgent() {
-	echoContent skyBlue "\n progress  $1/${totalProgress} : Update V2RAY-Agent script"
-	rm -rf /etc/v2ray-agent/install.sh
+	echoContent skyBlue "\n progress  $1/${totalProgress} : Update ss-agent script"
+	rm -rf /etc/ss-agent/install.sh
 	if wget --help | grep -q show-progress; then
-		wget -c -q --show-progress -P /etc/v2ray-agent/ -N --no-check-certificate "https://raw.githubusercontent.com/mack-a/v2ray-agent/master/install.sh"
+		wget -c -q --show-progress -P /etc/ss-agent/ -N --no-check-certificate "https://raw.githubusercontent.com/mack-a/ss-agent/master/install.sh"
 	else
-		wget -c -q -P /etc/v2ray-agent/ -N --no-check-certificate "https://raw.githubusercontent.com/mack-a/v2ray-agent/master/install.sh"
+		wget -c -q -P /etc/ss-agent/ -N --no-check-certificate "https://raw.githubusercontent.com/mack-a/ss-agent/master/install.sh"
 	fi
 
-	sudo chmod 700 /etc/v2ray-agent/install.sh
-	local version=$(cat /etc/v2ray-agent/install.sh | grep 'Current version: v' | awk -F "[v]" '{print $2}' | tail -n +2 | head -n 1 | awk -F "[\"]" '{print $1}')
+	sudo chmod 700 /etc/ss-agent/install.sh
+	local version=$(cat /etc/ss-agent/install.sh | grep 'Current version: v' | awk -F "[v]" '{print $2}' | tail -n +2 | head -n 1 | awk -F "[\"]" '{print $1}')
 
 	echoContent green "\n ---> update completed"
 	echoContent yellow " ---> Please manually[vasma]Open script"
 	echoContent green " ---> current version:${version}\n"
 	echoContent yellow "If the update is unsuccessful, please manually perform the following command.\n"
-	echoContent skyBlue "wget -P /root -N --no-check-certificate "https://raw.githubusercontent.com/mack-a/v2ray-agent/master/install.sh" && chmod 700 /root/install.sh && /root/install.sh"
+	echoContent skyBlue "wget -P /root -N --no-check-certificate "https://raw.githubusercontent.com/mack-a/ss-agent/master/install.sh" && chmod 700 /root/install.sh && /root/install.sh"
 	echo
 	exit 0
 }
@@ -3207,10 +3207,10 @@ EOF
 		tail -f ${configPathLog}error.log
 		;;
 	4)
-		tail -n 100 /etc/v2ray-agent/crontab_tls.log
+		tail -n 100 /etc/ss-agent/crontab_tls.log
 		;;
 	5)
-		tail -n 100 /etc/v2ray-agent/tls/acme.log
+		tail -n 100 /etc/ss-agent/tls/acme.log
 		;;
 	6)
 		echo >${configPathLog}access.log
@@ -3222,12 +3222,12 @@ EOF
 # Script shortcut
 aliasInstall() {
 
-	if [[ -f "$HOME/install.sh" ]] && [[ -d "/etc/v2ray-agent" ]] && grep <$HOME/install.sh -q "author：mack-a"; then
-		mv "$HOME/install.sh" /etc/v2ray-agent/install.sh
+	if [[ -f "$HOME/install.sh" ]] && [[ -d "/etc/ss-agent" ]] && grep <$HOME/install.sh -q "author：mack-a"; then
+		mv "$HOME/install.sh" /etc/ss-agent/install.sh
 		local vasmaType=
 		if [[ -d "/usr/bin/" ]] ; then
 			if [[ ! -f "/usr/bin/vasma" ]];then
-				ln -s /etc/v2ray-agent/install.sh /usr/bin/vasma
+				ln -s /etc/ss-agent/install.sh /usr/bin/vasma
 				chmod 700 /usr/bin/vasma
 				vasmaType=true
 			fi
@@ -3235,7 +3235,7 @@ aliasInstall() {
 			rm -rf "$HOME/install.sh"
 		elif [[ -d "/usr/sbin" ]] ; then
 			if [[ ! -f "/usr/sbin/vasma" ]];then
-				ln -s /etc/v2ray-agent/install.sh /usr/sbin/vasma
+				ln -s /etc/ss-agent/install.sh /usr/sbin/vasma
 				chmod 700 /usr/sbin/vasma
 				vasmaType=true
 			fi
@@ -3572,7 +3572,7 @@ dokodemoDoorUnblockNetflix() {
 	echoContent skyBlue "\n function 1/${totalProgress} : Any door floor machine unlock Netflix"
 	echoContent red "\n=============================================================="
 	echoContent yellow "# Precautions"
-	echoContent yellow "Any door unlock detailed, please check this article[https://github.com/mack-a/v2ray-agent/blob/master/documents/netflix/dokodemo-unblock_netflix.md]\n"
+	echoContent yellow "Any door unlock detailed, please check this article[https://github.com/mack-a/ss-agent/blob/master/documents/netflix/dokodemo-unblock_netflix.md]\n"
 
 	echoContent yellow "1.Add an outbound"
 	echoContent yellow "2.Adding a station"
@@ -4167,15 +4167,15 @@ subscribe() {
 		echoContent skyBlue "-------------------------Remark---------------------------------"
 		echoContent yellow "# When you check the subscription, you will regenerate your subscription."
 		echoContent yellow "# Each time you add, delete your account needs to reserve subscriptions"
-		rm -rf /etc/v2ray-agent/subscribe/*
-		rm -rf /etc/v2ray-agent/subscribe_tmp/*
+		rm -rf /etc/ss-agent/subscribe/*
+		rm -rf /etc/ss-agent/subscribe_tmp/*
 		showAccounts >/dev/null
-		mv /etc/v2ray-agent/subscribe_tmp/* /etc/v2ray-agent/subscribe/
+		mv /etc/ss-agent/subscribe_tmp/* /etc/ss-agent/subscribe/
 
-		if [[ -n $(ls /etc/v2ray-agent/subscribe) ]]; then
-			ls /etc/v2ray-agent/subscribe | while read -r email; do
-				local base64Result=$(base64 -w 0 /etc/v2ray-agent/subscribe/${email})
-				echo ${base64Result} >"/etc/v2ray-agent/subscribe/${email}"
+		if [[ -n $(ls /etc/ss-agent/subscribe) ]]; then
+			ls /etc/ss-agent/subscribe | while read -r email; do
+				local base64Result=$(base64 -w 0 /etc/ss-agent/subscribe/${email})
+				echo ${base64Result} >"/etc/ss-agent/subscribe/${email}"
 				echoContent skyBlue "--------------------------------------------------------------"
 				echoContent yellow "email：$(echo "${email}" | awk -F "[_]" '{print $1}')\n"
 				echoContent yellow "url：https://${currentHost}/s/${email}\n"
@@ -4195,7 +4195,7 @@ menu() {
 	echoContent red "\n=============================================================="
 	echoContent green "author：mack-a"
 	echoContent green "current version：v2.5.28"
-	echoContent green "Github：https://github.com/mack-a/v2ray-agent"
+	echoContent green "Github：https://github.com/mack-a/ss-agent"
 	echoContent green "describe：Eight-in-one copy script\c"
 	showInstallStatus
 	echoContent red "\n=============================================================="
