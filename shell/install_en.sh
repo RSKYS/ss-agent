@@ -1827,7 +1827,7 @@ EOF
 {
   "inbounds":[
     {
-      "port": 443,
+      "port": 4145,
       "protocol": "vless",
       "tag":"VLESSTCP",
       "settings": {
@@ -1868,7 +1868,7 @@ EOF
 {
 "inbounds":[
 {
-  "port": 443,
+  "port": 4145,
   "protocol": "vless",
   "tag":"VLESSTCP",
   "settings": {
@@ -2250,7 +2250,7 @@ EOF
 {
 "inbounds":[
 {
-  "port": 443,
+  "port": 4145,
   "protocol": "vless",
   "tag":"VLESSTCP",
   "settings": {
@@ -2371,7 +2371,7 @@ defaultBase64Code() {
 		port=$(echo "${hostPort}" | awk -F "[:]" '{print $2}')
 	else
 		host=${hostPort}
-		port=443
+		port=4145
 	fi
 
 	local path=$5
@@ -2465,7 +2465,7 @@ EOF
 
 #		echoContent yellow " ---> 通用格式[新版，推荐]"
 #
-#		echoContent green "    vmess://tcp+tls:2e6257c5-1402-41a6-a96d-1e0bdad78159-0@vu3.s83h.xyz:443/?type=http&tlsServerName=vu3.s83h.xyz#vu3.s83h.xyz_vmess_tcp"
+#		echoContent green "    vmess://tcp+tls:2e6257c5-1402-41a6-a96d-1e0bdad78159-0@vu3.s83h.xyz:4145/?type=http&tlsServerName=vu3.s83h.xyz#vu3.s83h.xyz_vmess_tcp"
 #		echoContent green "    vmess://tcp+tls:${id//\"/}-0@${add}:${port}/?type=http&path=/${path}&tlsServerName=${host}&alpn=http1.1#${ps//\"/}\n"
 #
 #		echoContent yellow " ---> 格式化明文(vmess+http+tls)"
@@ -2706,8 +2706,8 @@ addCorePort() {
 	echoContent red "\n=============================================================="
 	echoContent yellow "# Precautions\n"
 	echoContent yellow "Support quantity added"
-	echoContent yellow "Does not affect the use of 443 ports"
-	echoContent yellow "When you view your account, you will only show the account number of the default port 443."
+	echoContent yellow "Does not affect the use of 4145 ports"
+	echoContent yellow "When you view your account, you will only show the account number of the default port 4145."
 	echoContent yellow "Do not allow special characters, pay attention to the format of comma"
 	echoContent yellow "Entry example: 2053, 2083, 2087\n"
 
@@ -2729,7 +2729,7 @@ addCorePort() {
       "protocol": "dokodemo-door",
       "settings": {
         "address": "127.0.0.1",
-        "port": 443,
+        "port": 4145,
         "network": "tcp",
         "followRedirect": false
       },
@@ -3598,17 +3598,17 @@ setDokodemoDoorUnblockNetflixOutbounds() {
 	if [[ -n "${setIP}" ]]; then
 
 		unInstallOutbounds netflix-80
-		unInstallOutbounds netflix-443
+		unInstallOutbounds netflix-4145
 
-		outbounds=$(jq -r '.outbounds += [{"tag":"netflix-80","protocol":"freedom","settings":{"domainStrategy":"AsIs","redirect":"'${setIP}':22387"}},{"tag":"netflix-443","protocol":"freedom","settings":{"domainStrategy":"AsIs","redirect":"'${setIP}':22388"}}]' ${configPath}10_ipv4_outbounds.json)
+		outbounds=$(jq -r '.outbounds += [{"tag":"netflix-80","protocol":"freedom","settings":{"domainStrategy":"AsIs","redirect":"'${setIP}':22387"}},{"tag":"netflix-4145","protocol":"freedom","settings":{"domainStrategy":"AsIs","redirect":"'${setIP}':22388"}}]' ${configPath}10_ipv4_outbounds.json)
 
 		echo "${outbounds}"|jq . >${configPath}10_ipv4_outbounds.json
 
 		if [[ -f "${configPath}09_routing.json" ]] ;then
 			unInstallRouting netflix-80
-			unInstallRouting netflix-443
+			unInstallRouting netflix-4145
 
-			local routing=$(jq -r '.routing.rules += [{"type":"field","port":80,"domain":["ip.sb","geosite:netflix"],"outboundTag":"netflix-80"},{"type":"field","port":443,"domain":["ip.sb","geosite:netflix"],"outboundTag":"netflix-443"}]' ${configPath}09_routing.json)
+			local routing=$(jq -r '.routing.rules += [{"type":"field","port":80,"domain":["ip.sb","geosite:netflix"],"outboundTag":"netflix-80"},{"type":"field","port":4145,"domain":["ip.sb","geosite:netflix"],"outboundTag":"netflix-4145"}]' ${configPath}09_routing.json)
 			echo "${routing}"|jq . >${configPath}09_routing.json
 		else
 			cat <<EOF >${configPath}09_routing.json
@@ -3627,12 +3627,12 @@ setDokodemoDoorUnblockNetflixOutbounds() {
       },
       {
         "type": "field",
-        "port": 443,
+        "port": 4145,
         "domain": [
           "ip.sb",
           "geosite:netflix"
         ],
-        "outboundTag": "netflix-443"
+        "outboundTag": "netflix-4145"
       }
     ]
   }
@@ -3685,7 +3685,7 @@ setDokodemoDoorUnblockNetflixInbounds() {
       "protocol": "dokodemo-door",
       "settings": {
         "address": "0.0.0.0",
-        "port": 443,
+        "port": 4145,
         "network": "tcp",
         "followRedirect": false
       },
@@ -3695,7 +3695,7 @@ setDokodemoDoorUnblockNetflixInbounds() {
           "tls"
         ]
       },
-      "tag": "unblock-443"
+      "tag": "unblock-4145"
     }
   ]
 }
@@ -3735,7 +3735,7 @@ EOF
         "type": "field",
         "inboundTag": [
           "unblock-80",
-          "unblock-443"
+          "unblock-4145"
         ],
         "outboundTag": "direct"
       },
@@ -3746,7 +3746,7 @@ EOF
         "type": "field",
         "inboundTag": [
           "unblock-80",
-          "unblock-443"
+          "unblock-4145"
         ],
         "outboundTag": "blackhole-out"
       }
@@ -3776,9 +3776,9 @@ EOF
 removeDokodemoDoorUnblockNetflix() {
 
 	unInstallOutbounds netflix-80
-	unInstallOutbounds netflix-443
+	unInstallOutbounds netflix-4145
 	unInstallRouting netflix-80
-	unInstallRouting netflix-443
+	unInstallRouting netflix-4145
 	rm -rf ${configPath}01_netflix_inbounds.json
 
 	reloadCore

@@ -249,7 +249,7 @@ readCustomPort() {
 	if [[ -n "${configPath}" ]]; then
 		local port=
 		port=$(jq -r .inbounds[0].port "${configPath}02_VLESS_TCP_inbounds.json")
-		if [[ "${port}" != "443" ]]; then
+		if [[ "${port}" != "4145" ]]; then
 			customPort=${port}
 		fi
 	fi
@@ -388,7 +388,7 @@ allowPort() {
 	fi
 }
 
-# 检查80、443端口占用情况
+# 检查80、4145端口占用情况
 checkPortUsedStatus() {
 	if lsof -i tcp:80 | grep -q LISTEN; then
 		echoContent red "\n ---> 80端口被占用，请手动关闭后安装\n"
@@ -396,8 +396,8 @@ checkPortUsedStatus() {
 		exit 0
 	fi
 
-	if lsof -i tcp:443 | grep -q LISTEN; then
-		echoContent red "\n ---> 443端口被占用，请手动关闭后安装\n"
+	if lsof -i tcp:4145 | grep -q LISTEN; then
+		echoContent red "\n ---> 4145端口被占用，请手动关闭后安装\n"
 		lsof -i tcp:80 | grep LISTEN
 		exit 0
 	fi
@@ -1086,7 +1086,7 @@ checkIP() {
 		if [[ -n ${localIP} ]]; then
 			echoContent yellow " ---> 检测返回值异常，建议手动卸载nginx后重新执行脚本"
 		fi
-		local portFirewallPortStatus="443、80"
+		local portFirewallPortStatus="4145、80"
 
 		if [[ -n "${customPort}" ]]; then
 			portFirewallPortStatus="${customPort}"
@@ -1099,7 +1099,7 @@ checkIP() {
 				allowPort "${customPort}"
 			else
 				allowPort 80
-				allowPort 443
+				allowPort 4145
 			fi
 
 			handleNginx start
@@ -1247,7 +1247,7 @@ customPortFunction() {
 
 	if [[ "${historyCustomPortStatus}" == "n" || -z "${customPort}" ]]; then
 		echo
-		echoContent yellow "请输入端口[默认: 443]，如自定义端口，只允许使用DNS申请证书[回车使用默认]"
+		echoContent yellow "请输入端口[默认: 4145]，如自定义端口，只允许使用DNS申请证书[回车使用默认]"
 		read -r -p "端口:" customPort
 		if [[ -n "${customPort}" ]]; then
 			if ((customPort >= 1 && customPort <= 65535)); then
@@ -1257,7 +1257,7 @@ customPortFunction() {
 				exit
 			fi
 		else
-			echoContent yellow "\n ---> 端口: 443"
+			echoContent yellow "\n ---> 端口: 4145"
 		fi
 	fi
 
@@ -1323,9 +1323,9 @@ installTLS() {
 
 			installTLSCount=1
 			echo
-			echoContent red " ---> TLS安装失败，正在检查80、443端口是否开放"
+			echoContent red " ---> TLS安装失败，正在检查80、4145端口是否开放"
 			allowPort 80
-			allowPort 443
+			allowPort 4145
 			echoContent yellow " ---> 重新尝试安装TLS证书"
 
 			if tail -n 10 /etc/ss-agent/tls/acme.log | grep -q "Could not validate email address as valid"; then
@@ -2253,7 +2253,7 @@ initHysteriaConfig() {
 	"max_conn_client": 4096,
 	"disable_mtu_discovery": true,
 	"resolve_preference": "46",
-	"resolver": "https://8.8.8.8:443/dns-query"
+	"resolver": "https://8.8.8.8:4145/dns-query"
 }
 EOF
 
@@ -2547,7 +2547,7 @@ EOF
 
 	# VLESS_TCP
 	getClients "${configPath}../tmp/02_VLESS_TCP_inbounds.json" "${addClientsStatus}"
-	local defaultPort=443
+	local defaultPort=4145
 	if [[ -n "${customPort}" ]]; then
 		defaultPort=${customPort}
 	fi
@@ -2958,7 +2958,7 @@ EOF
 
 	# VLESS_TCP
 	getClients "${configPath}../tmp/02_VLESS_TCP_inbounds.json" "${addClientsStatus}"
-	local defaultPort=443
+	local defaultPort=4145
 	if [[ -n "${customPort}" ]]; then
 		defaultPort=${customPort}
 	fi
@@ -3527,7 +3527,7 @@ addCorePort() {
 	read -r -p "请选择:" selectNewPortType
 	if [[ "${selectNewPortType}" == "1" ]]; then
 		read -r -p "请输入端口号:" newPort
-		read -r -p "请输入默认的端口号，同时会更改订阅端口以及节点端口，[回车]默认443:" defaultPort
+		read -r -p "请输入默认的端口号，同时会更改订阅端口以及节点端口，[回车]默认4145:" defaultPort
 
 		if [[ -n "${defaultPort}" ]]; then
 			rm -rf "$(find ${configPath}* | grep "default")"
@@ -3548,7 +3548,7 @@ addCorePort() {
 				# 开放端口
 				allowPort "${port}"
 
-				local settingsPort=443
+				local settingsPort=4145
 				if [[ -n "${customPort}" ]]; then
 					settingsPort=${customPort}
 				fi
@@ -4647,19 +4647,19 @@ setDokodemoDoorUnblockStreamingMediaOutbounds() {
 	if [[ -n "${setIP}" ]]; then
 
 		unInstallOutbounds streamingMedia-80
-		unInstallOutbounds streamingMedia-443
+		unInstallOutbounds streamingMedia-4145
 
-		outbounds=$(jq -r ".outbounds += [{\"tag\":\"streamingMedia-80\",\"protocol\":\"freedom\",\"settings\":{\"domainStrategy\":\"AsIs\",\"redirect\":\"${setIP}:22387\"}},{\"tag\":\"streamingMedia-443\",\"protocol\":\"freedom\",\"settings\":{\"domainStrategy\":\"AsIs\",\"redirect\":\"${setIP}:22388\"}}]" ${configPath}10_ipv4_outbounds.json)
+		outbounds=$(jq -r ".outbounds += [{\"tag\":\"streamingMedia-80\",\"protocol\":\"freedom\",\"settings\":{\"domainStrategy\":\"AsIs\",\"redirect\":\"${setIP}:22387\"}},{\"tag\":\"streamingMedia-4145\",\"protocol\":\"freedom\",\"settings\":{\"domainStrategy\":\"AsIs\",\"redirect\":\"${setIP}:22388\"}}]" ${configPath}10_ipv4_outbounds.json)
 
 		echo "${outbounds}" | jq . >${configPath}10_ipv4_outbounds.json
 
 		if [[ -f "${configPath}09_routing.json" ]]; then
 			unInstallRouting streamingMedia-80 outboundTag
-			unInstallRouting streamingMedia-443 outboundTag
+			unInstallRouting streamingMedia-4145 outboundTag
 
 			local routing
 
-			routing=$(jq -r ".routing.rules += [{\"type\":\"field\",\"port\":80,\"domain\":[\"ip.sb\",\"geosite:${domainList//,/\",\"geosite:}\"],\"outboundTag\":\"streamingMedia-80\"},{\"type\":\"field\",\"port\":443,\"domain\":[\"ip.sb\",\"geosite:${domainList//,/\",\"geosite:}\"],\"outboundTag\":\"streamingMedia-443\"}]" ${configPath}09_routing.json)
+			routing=$(jq -r ".routing.rules += [{\"type\":\"field\",\"port\":80,\"domain\":[\"ip.sb\",\"geosite:${domainList//,/\",\"geosite:}\"],\"outboundTag\":\"streamingMedia-80\"},{\"type\":\"field\",\"port\":4145,\"domain\":[\"ip.sb\",\"geosite:${domainList//,/\",\"geosite:}\"],\"outboundTag\":\"streamingMedia-4145\"}]" ${configPath}09_routing.json)
 
 			echo "${routing}" | jq . >${configPath}09_routing.json
 		else
@@ -4679,12 +4679,12 @@ setDokodemoDoorUnblockStreamingMediaOutbounds() {
       },
       {
         "type": "field",
-        "port": 443,
+        "port": 4145,
         "domain": [
           "ip.sb",
           "geosite:${domainList//,/\",\"geosite:}"
         ],
-        "outboundTag": "streamingMedia-443"
+        "outboundTag": "streamingMedia-4145"
       }
     ]
   }
@@ -4746,7 +4746,7 @@ setDokodemoDoorUnblockStreamingMediaInbounds() {
       "protocol": "dokodemo-door",
       "settings": {
         "address": "0.0.0.0",
-        "port": 443,
+        "port": 4145,
         "network": "tcp",
         "followRedirect": false
       },
@@ -4756,7 +4756,7 @@ setDokodemoDoorUnblockStreamingMediaInbounds() {
           "tls"
         ]
       },
-      "tag": "streamingMedia-443"
+      "tag": "streamingMedia-4145"
     }
   ]
 }
@@ -4789,10 +4789,10 @@ EOF
 
 		if [[ -f "${configPath}09_routing.json" ]]; then
 			unInstallRouting streamingMedia-80 inboundTag
-			unInstallRouting streamingMedia-443 inboundTag
+			unInstallRouting streamingMedia-4145 inboundTag
 
 			local routing
-			routing=$(jq -r ".routing.rules += [{\"source\":[\"${setIPs//,/\",\"}\"],\"type\":\"field\",\"inboundTag\":[\"streamingMedia-80\",\"streamingMedia-443\"],\"outboundTag\":\"direct\"},{\"domains\":[\"geosite:${domainList//,/\",\"geosite:}\"],\"type\":\"field\",\"inboundTag\":[\"streamingMedia-80\",\"streamingMedia-443\"],\"outboundTag\":\"blackhole-out\"}]" ${configPath}09_routing.json)
+			routing=$(jq -r ".routing.rules += [{\"source\":[\"${setIPs//,/\",\"}\"],\"type\":\"field\",\"inboundTag\":[\"streamingMedia-80\",\"streamingMedia-4145\"],\"outboundTag\":\"direct\"},{\"domains\":[\"geosite:${domainList//,/\",\"geosite:}\"],\"type\":\"field\",\"inboundTag\":[\"streamingMedia-80\",\"streamingMedia-4145\"],\"outboundTag\":\"blackhole-out\"}]" ${configPath}09_routing.json)
 			echo "${routing}" | jq . >${configPath}09_routing.json
 		else
 			cat <<EOF >${configPath}09_routing.json
@@ -4806,7 +4806,7 @@ EOF
                     "type": "field",
                     "inboundTag": [
                       "streamingMedia-80",
-                      "streamingMedia-443"
+                      "streamingMedia-4145"
                     ],
                     "outboundTag": "direct"
                   },
@@ -4817,7 +4817,7 @@ EOF
                     "type": "field",
                     "inboundTag": [
                       "streamingMedia-80",
-                      "streamingMedia-443"
+                      "streamingMedia-4145"
                     ],
                     "outboundTag": "blackhole-out"
                   }
@@ -4839,13 +4839,13 @@ EOF
 removeDokodemoDoorUnblockStreamingMedia() {
 
 	unInstallOutbounds streamingMedia-80
-	unInstallOutbounds streamingMedia-443
+	unInstallOutbounds streamingMedia-4145
 
 	unInstallRouting streamingMedia-80 inboundTag
-	unInstallRouting streamingMedia-443 inboundTag
+	unInstallRouting streamingMedia-4145 inboundTag
 
 	unInstallRouting streamingMedia-80 outboundTag
-	unInstallRouting streamingMedia-443 outboundTag
+	unInstallRouting streamingMedia-4145 outboundTag
 
 	rm -rf ${configPath}01_netflix_inbounds.json
 
@@ -5309,7 +5309,7 @@ subscribe() {
 				echoContent yellow "email:${email}\n"
 				local currentDomain=${currentHost}
 
-				if [[ -n "${currentDefaultPort}" && "${currentDefaultPort}" != "443" ]]; then
+				if [[ -n "${currentDefaultPort}" && "${currentDefaultPort}" != "4145" ]]; then
 					currentDomain="${currentHost}:${currentDefaultPort}"
 				fi
 
